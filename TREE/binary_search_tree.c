@@ -1,4 +1,3 @@
-// SELVABHARATHI S B.Tech(IT)
 #include<stdio.h>
 #include<stdlib.h>
 
@@ -93,7 +92,7 @@ int balanced_Or_Not(struct node* root)
   int rightheight = height_BST(root->right);
   if(abs(leftheight-rightheight) > 1)
     return 0;
-  return 1;
+  return 1;//which means the abs(leftHeight - rightheight) <= 1
 }
 
 struct node* search(struct node* root,int element)
@@ -108,43 +107,67 @@ struct node* search(struct node* root,int element)
     return root;
 }
 
-struct node* delete_Node(struct node* root,int key)  // WRONG
+struct node* delete_Node(struct node* root,int key)
 {
-  struct node *temp;
   if(root == NULL)
     return NULL;
   else if(key < root->data)
     root->left = delete_Node(root->left,key);
   else if(key > root->data)
     root->right = delete_Node(root->right,key);
-  else if(root->left && root->right)
+  else//found the node to delete.
   {
-    temp = min_value(root->right);
-    root->data = temp->data;
-    root->right = delete_Node(root->right,root->data);
-  }
-  else
-  {
-    temp = root;
-    if(root->left == NULL)
-      root = root->right;
+    // node with no child.
+    if(root->left == NULL && root->right == NULL)
+    {
+      free(root);
+      return NULL;
+    }
+    // node with one child.
+    else if(root->left == NULL)
+    {
+     struct node *temp = root;
+     root = root->right;
+     free(temp);
+    }
     else if(root->right == NULL)
+    {
+      struct node *temp = root;
       root = root->left;
-    free(temp);
-  }
-}
-
-struct node* empty(struct node *root) // WRONG
-{
-    if(root==NULL)
-        return NULL;
+      free(temp);
+    }
+    // node with two child.
     else
     {
-      empty(root->left);
-      empty(root->right);
-      free(root->data);
+      struct node *temp = min_value(root->right);
+      root->data = temp->data;
+      root->right = delete_Node(root->right,temp->data);
     }
-    return NULL;
+  }
+  return root;
+}
+
+void empty(struct node *root)
+{
+    if(root==NULL)
+        return;
+    empty(root->left);
+    free(root);
+    empty(root->right);
+}
+
+int level_tree(struct node* root,int key,int level)
+{
+  int l;
+  if(root == NULL)
+    return 0;
+  if(root->data == key)
+    return level;
+  l = level_tree(root->left,key,level+1);
+  if(l != 0)
+    return l;
+  l = level_tree(root->right,key,level+1);
+  return l;
 }
 
 int main()
@@ -165,7 +188,8 @@ int main()
         printf("10.empty the tree\n");
         printf("11.search element\n");
         printf("12.depth of given node\n");
-        printf("13.exit\n");
+        printf("13.level of node int the tree\n");
+        printf("14.exit\n");
         printf("\tenter your choice = ");
         scanf("%d",&ch);
         switch(ch)
@@ -190,11 +214,17 @@ int main()
                 break;
             case 5:
                 max = max_value(root);
-                printf("max value is = %d\n",max->data);
+                if(max != 0)
+                  printf("max value is = %d\n",max->data);
+                else
+                  printf("the tree is empty\n");
                 break;
             case 6:
                 min = min_value(root);
-                printf("min value is = %d\n",min->data);
+                if(min != 0)
+                  printf("min value is = %d\n",min->data);
+                else
+                  printf("the tree is empty\n");
                 break;
             case 7:
                 printf("height of the BST is = %d\n",height_BST(root));
@@ -212,7 +242,8 @@ int main()
                 printf("\n");
                 break;
             case 10:
-                root = empty(root);
+                empty(root);
+                root = NULL;
                 break;
             case 11:
                 printf("enter element to search = ");
@@ -222,7 +253,17 @@ int main()
                 else
                   printf("element not found\n");
                 break;
+            case 12:
+                printf("enter node to find its depth = ");
+                scanf("%d",&ele);
+                printf("the depth of the given node is = %d\n",level_tree(root,ele,1)-1);
+                break;
             case 13:
+                printf("enter node to find its level = ");
+                scanf("%d",&ele);
+                printf("the level of the given node is = %d\n",level_tree(root,ele,1));
+                break;
+            case 14:
                 exit(0);
             default:
                 printf("..........INVALID CHOICE..........\n");
@@ -331,8 +372,11 @@ LEVEL
     level = depth + 1;
     level of root is 1.
 
-
-
+KEY FORMULA
+    > The minimum number of nodes in a binary tree of height h = h+1
+    > The maximum number of nodes in a binary tree of height 'h' = 2h+1-1
+    > For a binary tree having n leaf nodes, total number of nodes of degree two = n-1
+    > For a complete n-ary tree having X internal nodes, the total number of leaves  = X(n-1)+1
 
 
 ***************************************************************************************************************/
